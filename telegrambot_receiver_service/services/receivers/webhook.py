@@ -1,4 +1,3 @@
-import abc
 import asyncio
 import json
 from typing import Optional, List, Tuple
@@ -9,24 +8,15 @@ import sanic.response
 
 from telegrambot_receiver_service.services.publishers.base import BasePublisher
 from telegrambot_receiver_service.services.telegram import setup_webhook
+from telegrambot_receiver_service.services.receivers.base import BaseReceiver
 from telegrambot_receiver_service.utils import get_uuid, ip_in_network
 from telegrambot_receiver_service.settings import webhook_settings, telegram_settings
 from telegrambot_receiver_service.logging import logger
 
 
-class BaseReceiver(abc.ABC):
-    @abc.abstractmethod
-    async def publish(self, data: str):
-        pass
-
-    @abc.abstractmethod
-    def run(self):
-        pass
-
-
 class WebhookReceiver(BaseReceiver):
     def __init__(self, publishers: List[BasePublisher]):
-        self.publishers = publishers
+        super().__init__(publishers)
 
         if webhook_settings.endpoint_is_random:
             webhook_endpoint = get_uuid()
@@ -94,3 +84,4 @@ class WebhookReceiver(BaseReceiver):
         webhook_url = f"https://{webhook_settings.domain}/{self.webhook_endpoint}"
         asyncio.run(setup_webhook(webhook_url))
         self._app.run(host=webhook_settings.bind, port=webhook_settings.port)
+

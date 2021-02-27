@@ -1,4 +1,4 @@
-from telegrambot_receiver_service.services.receiver import WebhookReceiver
+from telegrambot_receiver_service.services.receivers.webhook import WebhookReceiver
 from telegrambot_receiver_service.services.telegram import teardown_webhook
 from telegrambot_receiver_service.settings import redis_settings
 from telegrambot_receiver_service.utils import async_gather
