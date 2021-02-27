@@ -4,6 +4,9 @@ from typing import Optional, List
 from netaddr import IPNetwork
 
 import pydantic
+from pydantic import constr
+
+String = constr(strip_whitespace=True, min_length=1)
 
 ENV_FILE = os.getenv("ENV_FILE", ".env")
 
@@ -14,12 +17,12 @@ class BaseSettings(pydantic.BaseSettings):
 
 
 class WebhookSettings(BaseSettings):
-    domain: str
-    endpoint: str = "random"
-    bind: str = "0.0.0.0"
+    domain: String
+    endpoint: String = "random"
+    bind: String = "0.0.0.0"
     port: int = 8000
     status_endpoint: bool = True
-    limit_subnets: Optional[str] = None  # example: "149.154.160.0/20, 91.108.4.0/22"
+    limit_subnets: Optional[String] = None  # example: "149.154.160.0/20, 91.108.4.0/22"
 
     class Config(BaseSettings.Config):
         env_prefix = "WEBHOOK_"
@@ -42,7 +45,7 @@ class WebhookSettings(BaseSettings):
 
 
 class TelegramSettings(BaseSettings):
-    token: str
+    token: String
     delete_webhook: bool = True
 
     class Config(BaseSettings.Config):
@@ -50,8 +53,8 @@ class TelegramSettings(BaseSettings):
 
 
 class RedisSettings(BaseSettings):
-    url: Optional[str] = None  # example: "redis://localhost:6379"
-    queue_name: str = "TelegramBotQueue"
+    url: Optional[String] = None  # example: "redis://localhost:6379"
+    queue_name: String = "telegram_bot"
 
     @property
     def enabled(self):
@@ -62,7 +65,7 @@ class RedisSettings(BaseSettings):
 
 
 class GeneralSettings(BaseSettings):
-    log_level: str = "INFO"
+    log_level: String = "INFO"
 
 
 webhook_settings = WebhookSettings()
