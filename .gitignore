@@ -1,5 +1,6 @@
 .idea/
 .vscode/
+.env
 *.pem
 *.key
 *.crt
