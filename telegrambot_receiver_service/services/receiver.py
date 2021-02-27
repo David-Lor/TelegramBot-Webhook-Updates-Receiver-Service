@@ -7,7 +7,7 @@ import sanic
 import sanic.request
 import sanic.response
 
-from telegrambot_receiver_service.services.publisher import BasePublisher
+from telegrambot_receiver_service.services.publishers.base import BasePublisher
 from telegrambot_receiver_service.services.telegram import setup_webhook
 from telegrambot_receiver_service.utils import get_uuid, ip_in_network
 from telegrambot_receiver_service.settings import webhook_settings, telegram_settings

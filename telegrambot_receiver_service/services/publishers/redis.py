@@ -1,24 +1,10 @@
-import abc
 from typing import Optional
 
 import aioredis
 
+from telegrambot_receiver_service.services.publishers.base import BasePublisher
 from telegrambot_receiver_service.settings import redis_settings
 from telegrambot_receiver_service.logging import logger
-
-
-class BasePublisher(abc.ABC):
-    @abc.abstractmethod
-    async def connect(self):
-        pass
-
-    @abc.abstractmethod
-    async def close(self):
-        pass
-
-    @abc.abstractmethod
-    async def publish(self, data: str):
-        pass
 
 
 class RedisPublisher(BasePublisher):
