@@ -17,7 +17,7 @@ def async_gather(*coroutines, timeout: Optional[float] = None):
             return await asyncio.wait_for(coro, timeout=timeout)
         return await coro
 
-    return asyncio.run(__f())
+    return asyncio.get_event_loop().run_until_complete(__f())
 
 
 def ip_in_network(ip: str, network: Union[str, netaddr.IPNetwork]) -> bool:

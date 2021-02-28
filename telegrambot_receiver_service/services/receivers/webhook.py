@@ -1,5 +1,6 @@
 import asyncio
 import json
+from signal import signal, SIGINT
 from typing import Optional, List, Tuple
 
 import sanic
@@ -95,7 +96,21 @@ class WebhookReceiver(BaseReceiver):
         await asyncio.gather(*[publisher.publish(data) for publisher in self.publishers])
 
     def run(self):
+        # https://github.com/sanic-org/sanic/blob/master/examples/run_async.py
+        loop = asyncio.get_event_loop()
+
+        # TODO run task in entrypoint, gather with publisher.connect() calls
         webhook_url = f"https://{webhook_settings.domain}/{self.webhook_endpoint}"
-        asyncio.run(setup_webhook(webhook_url))
-        self._app.run(host=webhook_settings.bind, port=webhook_settings.port)
-        # uvicorn.run(self._app, host=webhook_settings.bind, port=webhook_settings.port, workers=8)
+        loop.run_until_complete(setup_webhook(webhook_url))
+
+        server = self._app.create_server(host=webhook_settings.bind, port=webhook_settings.port,
+                                         return_asyncio_server=True)
+
+        asyncio.ensure_future(server, loop=loop)
+        signal(SIGINT, lambda s, f: loop.stop())
+
+        # noinspection PyBroadException
+        try:
+            loop.run_forever()
+        except:
+            loop.stop()
