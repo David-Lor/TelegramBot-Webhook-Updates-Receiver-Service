@@ -59,6 +59,8 @@ Settings are defined using environment variables, or a .env file. Variables defi
 
 - **General**
   - **ENV_FILE**: (default: `.env`) path of the .env file to load settings from. If the file does not exist or cannot be found, settings will not load from .env file.
+  - **PUBLISHER_CONNECT_TIMEOUT**: (default: `10`) timeout in seconds for all publishers to initialize/connect on service startup.
+  - **TEARDOWN_TIMEOUT**: (default: `10`) timeout in seconds for all teardown operations, executed when service is closed.
 - **Webhook**
   - **WEBHOOK_DOMAIN**: (**required**) domain where webhook is served; does not include "https://" nor the endpoint.
   - **WEBHOOK_ENDPOINT**: (default: `random`) endpoint where Telegram will send Webhook POST requests. With the domain, forms the webhook URL that is sent to Telegram to send bot updates to. Can be one of:
@@ -68,6 +70,7 @@ Settings are defined using environment variables, or a .env file. Variables defi
   - **WEBHOOK_BIND**: (default: `0.0.0.0`) address to host the webhook server on.
   - **WEBHOOK_PORT**: (default: `8000`) port to host the webhook server on.
   - **WEBHOOK_STATUS_ENDPOINT**: (default: `true`) if false, do not serve a `/status` endpoint, accessible from any host to verify that the server is accessible.
+  - **WEBHOOK_PUBLISH_TIMEOUT**: (default: `5`) timeout in seconds for publishing webhook received data in all publishers.
   - **WEBHOOK_LIMIT_SUBNETS**: (optional) comma-separated list of networks, with the format `ip/mask`, that can be used for limiting access to the webhook endpoint to hosts from these subnetworks. The subnetworks used by Telegram, as stated [in their documentation](https://core.telegram.org/bots/webhooks), would be `149.154.160.0/20,91.108.4.0/22` (keep in mind that these could change in the future). If not specified, no limitations will be applied.
 - **Telegram**
   - **TELEGRAM_TOKEN**: (**required**) Telegram Bot token.

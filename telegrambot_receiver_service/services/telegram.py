@@ -18,7 +18,7 @@ async def _request(endpoint: str, body: Optional[dict]):
 
 async def setup_webhook(url: str):
     logger.info("Asking Telegram to setup webhook...")
-    data = dict(url=url)
+    data = dict(url=url, max_connections=100)
     await _request(endpoint="setWebhook", body=data)
     logger.info("Telegram webhook set")
 

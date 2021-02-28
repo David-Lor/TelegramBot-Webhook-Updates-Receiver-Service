@@ -1,5 +1,5 @@
 import asyncio
-from typing import Union
+from typing import Union, Optional
 
 import netaddr
 
@@ -10,9 +10,12 @@ def get_uuid():
     return str(uuid4())
 
 
-def async_gather(*coroutines):
+def async_gather(*coroutines, timeout: Optional[float] = None):
     async def __f():
-        return await asyncio.gather(*coroutines)
+        coro = asyncio.gather(*coroutines)
+        if timeout is not None:
+            return await asyncio.wait_for(coro, timeout=timeout)
+        return await coro
 
     return asyncio.run(__f())
 

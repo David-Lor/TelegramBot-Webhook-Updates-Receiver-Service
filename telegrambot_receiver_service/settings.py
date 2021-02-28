@@ -22,6 +22,7 @@ class WebhookSettings(BaseSettings):
     bind: String = "0.0.0.0"
     port: int = 8000
     status_endpoint: bool = True
+    publish_timeout: float = 5
     limit_subnets: Optional[String] = None  # example: "149.154.160.0/20, 91.108.4.0/22"
 
     class Config(BaseSettings.Config):
@@ -65,6 +66,8 @@ class RedisSettings(BaseSettings):
 
 
 class GeneralSettings(BaseSettings):
+    publisher_connect_timeout: float = 10
+    teardown_timeout: float = 10
     log_level: String = "INFO"
 
 
