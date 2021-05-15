@@ -81,5 +81,10 @@ Settings are defined using environment variables, or a .env file. Variables defi
 
 ## Changelog
 
+_Versions prior 1.0.0 are considered experimental and breaking changes may occur on MINOR versions (0.x)_
+
+- 0.1.0
+    - Final version
+    - Redis integration
 - 0.0.1
     - Initial PoC script
