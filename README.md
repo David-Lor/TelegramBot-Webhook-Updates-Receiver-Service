@@ -29,29 +29,21 @@ A very basic architecture would involve three services:
 
 ## Getting started
 
-The initial PoC consists of the `receiver.py` script, which **currently** works as following:
+The following steps will start running the service out of the box, using Docker and ngrok:
 
-- For simplicity, is intended to work using [ngrok](https://ngrok.com/) - a free tunnelling service that exposes a local port on a public URL, without opening/forwarding ports in your local network.
-- We run Flask to serve the webhook for Telegram Updates, without SSL - by default, ngrok creates a https URL, with a valid certificate, so we do not need to create a self-signed certificate and pass it to Telegram.
-  However, the script currently supports creating and using self-signed certificates, but if using ngrok it is required to create a (free) account in order to forward https directly.
-- The current PoC only prints received Telegram Bot updates using a logging module - it does not publish them anywhere.
-
-The steps required to make it work are the following (`Lxx` refers to lines in file `receiver.py`):
-
-- Create a bot using BotFather.
-- Paste its token in L10 (non-PoC version will use proper settings!).
-- Install the Python requirements in [requirements.txt](requirements.txt) (using a virtual environment is recommended).
-- Download and start running ngrok with the command: `ngrok http 8080` (the port refers to the Flask server, which can be changed in L12).
-- Paste the ngrok domain (which in free accounts would be something like `(bunch of letters and numbers).ngrok.io`) in L11 (do not copy the leading `https://`). Remember that this domain changes each time the ngrok service is started.
-- Run the script (`python receiver.py`).
-
-The module works as following (see the `main()` method for reference):
-
-- A self-signed certificate could be generated initially.
-- Call the Telegram Bot API endpoint to setup the webhook, using the full URL (if using a self-signed certificate, this will be appended to the API call so Telegram can use it). The webhook token is randomly generated each time the script runs.
-- Register the teardown method at exit, which will call the Telegram Bot API endpoint to delete the webhook, when the script stops running.
-- Setup the Flask server, by creating an instance of it and registering the endpoints (one status endpoint, and the current webhook endpoint that will receive Telegram Bot updates).
-- Start running the Flask server (using the self-signed certificate, if any).
+1. You must own a Telegram bot. If not, create it from BotFather. You will need the bot token.
+2. Download ngrok, and start running it as following:
+   ```bash
+   ./ngrok http 8025
+   ```
+3. Copy the `sample.env` file as `.env`, and complete the following settings
+   - `TELEGRAM_TOKEN` with you bot token
+   - `WEBHOOK_DOMAIN` with the domain that ngrok is currently using, without including `http://` nor `https://` (notice that ngrok free plan will change the domain periodically)
+4. Start running the webhook receiver service:
+   ```bash
+   docker run --rm -it -p 8025:8025 -e GIT_REPOSITORY="https://github.com/David-Lor/TelegramBot-Webhook-Updates-Receiver-Service" --env-file=".env" davidlor/python-git-app:slim
+   ```
+5. Send something to your bot. You should see some output on the container
 
 ## Settings
 
@@ -79,10 +71,13 @@ Settings are defined using environment variables, or a .env file. Variables defi
   - **REDIS_URL**: (optional) if specified, put bot updates on a queue of the given Redis server. URL example: `redis://localhost:6379`.
   - **REDIS_QUEUE_NAME**: (default: `telegram_bot`) name of the Redis queue where bot updates are put.
 
-## TODO
+## Upcoming features...
 
+- MQTT integration
+- AMQP integration
 - Integrate with ngrok (auto-load domain from Free plan)
 - Allow creating and/or using self-signed certificates
+- Make the service a library that can be imported on existing bots, so no microservice pattern would be required
 
 ## Changelog
 
