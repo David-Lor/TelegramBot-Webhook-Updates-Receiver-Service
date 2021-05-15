@@ -1,5 +1,4 @@
 import asyncio
-import json
 from signal import signal, SIGINT
 from typing import Optional, List, Tuple
 
@@ -42,10 +41,6 @@ class WebhookReceiver(BaseReceiver):
         return cls._get_plain_response(body=message, status=200)
 
     @classmethod
-    def get_response_bad_request(cls, message: str = "Bad request"):
-        return cls._get_plain_response(body=message, status=400)
-
-    @classmethod
     def get_response_forbidden(cls, message: str = "Forbidden"):
         return cls._get_plain_response(body=message, status=403)
 
@@ -77,15 +72,11 @@ class WebhookReceiver(BaseReceiver):
                     logger.debug(f"Received request from non-allowed IP {ip}")
                     return self.get_response_forbidden()
 
-                data = request.json
+                data = request.body
                 logger.bind(webhook_received_data=data).debug("Telegram Webhook received")
 
-                if not isinstance(data, dict):
-                    return self.get_response_bad_request()
-
-                # TODO Could access request body/data directly and not parse+stringify json
                 # TODO Setting to publish without leaving request pending? (fire & forget)
-                await asyncio.wait_for(self.publish(json.dumps(data)), timeout=webhook_settings.publish_timeout)
+                await asyncio.wait_for(self.publish(data), timeout=webhook_settings.publish_timeout)
                 return self.get_response_ok()
 
             except Exception:
