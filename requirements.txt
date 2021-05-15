@@ -1,3 +1,9 @@
-flask
-requests
+sanic
+uvloop
+httpx
+netaddr
+pydantic
+python-dotenv
 loguru
+
+aioredis
