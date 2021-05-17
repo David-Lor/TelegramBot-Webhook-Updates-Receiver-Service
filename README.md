@@ -45,6 +45,31 @@ The following steps will start running the service out of the box, using Docker 
    ```
 5. Send something to your bot. You should see some output on the container
 
+### Example: pytelegrambotapi + redis
+
+A Telegram Bot backend example is available [here](https://github.com/David-Lor/TelegramBot-Webhook-Updates-Receiver-Service/tree/example/pytelegrambotapi%2Bredis/telegrambot_client). It can be deployed with the following commands:
+
+```bash
+# Start ngrok
+./ngrok http 8025
+
+# Add the REDIS_URL & REDIS_QUEUE_NAME settings (for both server & client) - Ensure you already have copied and modified a .env file!
+echo "REDIS_URL=redis://telegrambot-redis:6379" >> .env
+echo "REDIS_QUEUE_NAME=TelegramBotQueue" >> .env
+
+# Create a docker network for the services
+docker network create telegrambot-net
+
+# Start the Redis server
+docker run -d --name=telegrambot-redis --network=telegrambot-net redis
+
+# Start the webhook server (receive updates through webhook, enqueue on Redis)
+docker run -d --name=telegrambot-receiver -p 8025:8025 --net=telegrambot-net -e GIT_REPOSITORY="https://github.com/David-Lor/TelegramBot-Webhook-Updates-Receiver-Service" --env-file=".env" davidlor/python-git-app:slim
+
+# Start the Telegram bot backend (read updates from Redis queue, process them)
+docker run -d --name=telegrambot-backend --net=telegrambot-net -e GIT_REPOSITORY="https://github.com/David-Lor/TelegramBot-Webhook-Updates-Receiver-Service" -e GIT_BRANCH="example/pytelegrambotapi+redis" --env-file=".env" davidlor/python-git-app:slim
+```
+
 ## Settings
 
 Settings are defined using environment variables, or a .env file. Variables defined as environment variables will override those defined in the .env file.
@@ -78,6 +103,7 @@ Settings are defined using environment variables, or a .env file. Variables defi
 - Integrate with ngrok (auto-load domain from Free plan)
 - Allow creating and/or using self-signed certificates
 - Make the service a library that can be imported on existing bots, so no microservice pattern would be required
+- Refactor example (do not use other branch) when `davidlor/python-git-app` Docker image supports arbitrary Python script running
 
 ## Changelog
 
