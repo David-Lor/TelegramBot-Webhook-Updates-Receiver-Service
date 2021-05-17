@@ -1,6 +1,6 @@
 # conda env create --file conda-env.yml
 
-name: telegrambot-webhook-receiver
+name: telegrambot-redis-client
 dependencies:
     - python=3.7
     - pip

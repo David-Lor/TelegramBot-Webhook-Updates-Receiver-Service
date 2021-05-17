@@ -1,9 +1,4 @@
-sanic
-uvloop
-httpx
-netaddr
+pytelegrambotapi
+redis
 pydantic
-python-dotenv
 loguru
-
-aioredis

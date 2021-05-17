@@ -1,3 +1,3 @@
-from telegrambot_receiver_service.entrypoint import run
+from telegrambot_client.entrypoint import run
 
 run()
