@@ -1,3 +1,4 @@
+import urllib.parse
 from typing import Optional
 
 import httpx
@@ -9,7 +10,8 @@ from telegrambot_receiver_service.logging import logger
 async def _request(endpoint: str, body: Optional[dict]):
     async with httpx.AsyncClient() as client:
         logger.debug(f"Calling Telegram bot API endpoint {endpoint}...")
-        url = f"https://api.telegram.org/bot{telegram_settings.token}/{endpoint}"
+        url = urllib.parse.urljoin(telegram_settings.api_url, f"/bot{telegram_settings.token}/{endpoint}")
+
         response = await client.post(url, json=body)
         response.raise_for_status()
         logger.debug(f"Telegram bot API call to {endpoint} returned {response.status_code} {response.text}")
