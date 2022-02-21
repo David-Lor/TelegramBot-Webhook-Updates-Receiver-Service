@@ -11,7 +11,7 @@ class BaseReceiver(abc.ABC):
         self.publishers = publishers
 
     @abc.abstractmethod
-    async def publish(self, data: str):
+    async def publish(self, data: bytes):
         pass
 
     @abc.abstractmethod

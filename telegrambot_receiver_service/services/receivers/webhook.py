@@ -84,8 +84,8 @@ class WebhookReceiver(BaseReceiver):
                 logger.exception("Error handling webhook request")
                 return self.get_response_internal_error()
 
-    async def publish(self, data: str):
-        await asyncio.gather(*[publisher.publish(data.encode()) for publisher in self.publishers])
+    async def publish(self, data: bytes):
+        await asyncio.gather(*[publisher.publish(data) for publisher in self.publishers])
 
     def run(self):
         # https://github.com/sanic-org/sanic/blob/master/examples/run_async.py
