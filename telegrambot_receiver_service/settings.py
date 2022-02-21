@@ -49,6 +49,7 @@ class WebhookSettings(BaseSettings):
 class TelegramSettings(BaseSettings):
     token: String
     delete_webhook: bool = True
+    api_url: String = "https://api.telegram.org"
 
     class Config(BaseSettings.Config):
         env_prefix = "TELEGRAM_"

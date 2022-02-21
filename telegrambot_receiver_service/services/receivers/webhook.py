@@ -60,6 +60,7 @@ class WebhookReceiver(BaseReceiver):
 
         return any(ip_in_network(ip, subnet) for subnet in limit_subnetworks), ip
 
+    # noinspection PyUnusedLocal
     async def _endpoint_status(self, request: sanic.request.Request):
         return self.get_response_ok()
 
@@ -84,14 +85,14 @@ class WebhookReceiver(BaseReceiver):
                 return self.get_response_internal_error()
 
     async def publish(self, data: str):
-        await asyncio.gather(*[publisher.publish(data) for publisher in self.publishers])
+        await asyncio.gather(*[publisher.publish(data.encode()) for publisher in self.publishers])
 
     def run(self):
         # https://github.com/sanic-org/sanic/blob/master/examples/run_async.py
         loop = asyncio.get_event_loop()
 
         # TODO run task in entrypoint, gather with publisher.connect() calls
-        webhook_url = f"https://{webhook_settings.domain}/{self.webhook_endpoint}"
+        webhook_url = f"{webhook_settings.domain}:{webhook_settings.port}/{self.webhook_endpoint}"
         loop.run_until_complete(setup_webhook(webhook_url))
 
         server = self._app.create_server(host=webhook_settings.bind, port=webhook_settings.port,
@@ -103,5 +104,5 @@ class WebhookReceiver(BaseReceiver):
         # noinspection PyBroadException
         try:
             loop.run_forever()
-        except:
+        except Exception:
             loop.stop()
