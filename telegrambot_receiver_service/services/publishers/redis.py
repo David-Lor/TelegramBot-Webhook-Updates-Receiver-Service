@@ -29,7 +29,7 @@ class RedisPublisher(BasePublisher):
             logger.debug("No need to close Redis")
         self._redis = None
 
-    async def publish(self, data: str):
+    async def publish(self, data: bytes):
         logger.bind(publish_data=data).debug("Enqueuing data into Redis...")
         await self._redis.rpush(redis_settings.queue_name, data)
         logger.debug("Redis data enqueued")

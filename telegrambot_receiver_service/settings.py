@@ -7,6 +7,7 @@ import pydantic
 from pydantic import constr
 
 String = constr(strip_whitespace=True, min_length=1)
+StringEmptiable = constr(strip_whitespace=True)
 
 ENV_FILE = os.getenv("ENV_FILE", ".env")
 
@@ -65,6 +66,20 @@ class RedisSettings(BaseSettings):
         env_prefix = "REDIS_"
 
 
+class AMQPSettings(BaseSettings):
+    url: Optional[String] = None  # example: amqp://user:pass@localhost:5672/vhost
+    exchange: StringEmptiable = ""
+    routingkey: StringEmptiable = ""
+    deliverymode_persistent: bool = False
+
+    @property
+    def enabled(self):
+        return bool(self.url)
+
+    class Config(BaseSettings.Config):
+        env_prefix = "AMQP_"
+
+
 class GeneralSettings(BaseSettings):
     publisher_connect_timeout: float = 10
     teardown_timeout: float = 10
@@ -74,4 +89,5 @@ class GeneralSettings(BaseSettings):
 webhook_settings = WebhookSettings()
 telegram_settings = TelegramSettings()
 redis_settings = RedisSettings()
+amqp_settings = AMQPSettings()
 general_settings = GeneralSettings()
