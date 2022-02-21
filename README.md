@@ -79,7 +79,7 @@ Settings are defined using environment variables, or a .env file. Variables defi
   - **PUBLISHER_CONNECT_TIMEOUT**: (default: `10`) timeout in seconds for all publishers to initialize/connect on service startup.
   - **TEARDOWN_TIMEOUT**: (default: `10`) timeout in seconds for all teardown operations, executed when service is closed.
 - **Webhook**
-  - **WEBHOOK_DOMAIN**: (**required**) domain where webhook is served, including "https://" or "http://", but NOT the endpoint.
+  - **WEBHOOK_DOMAIN**: (**required**) domain where webhook is served, including "https://" or "http://", but NOT the endpoint. Must include the port if different from 443 (https) or 80 (http).
   - **WEBHOOK_ENDPOINT**: (default: `random`) endpoint where Telegram will send Webhook POST requests. With the domain, forms the webhook URL that is sent to Telegram to send bot updates to. Can be one of:
     - `random`: generate a random UUID4 string as endpoint, each time the application starts
     - `token`: use the bot token as endpoint

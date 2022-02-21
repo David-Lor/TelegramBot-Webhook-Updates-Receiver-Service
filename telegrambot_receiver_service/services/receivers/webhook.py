@@ -92,7 +92,7 @@ class WebhookReceiver(BaseReceiver):
         loop = asyncio.get_event_loop()
 
         # TODO run task in entrypoint, gather with publisher.connect() calls
-        webhook_url = f"{webhook_settings.domain}:{webhook_settings.port}/{self.webhook_endpoint}"
+        webhook_url = f"{webhook_settings.domain}/{self.webhook_endpoint}"
         loop.run_until_complete(setup_webhook(webhook_url))
 
         server = self._app.create_server(host=webhook_settings.bind, port=webhook_settings.port,
