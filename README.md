@@ -29,6 +29,8 @@ A very basic architecture would involve three services:
 
 ## Getting started
 
+### Webhook
+
 The following steps will start running the service out of the box, using Docker and ngrok:
 
 1. You must own a Telegram bot. If not, create it from BotFather. You will need the bot token.
@@ -45,7 +47,7 @@ The following steps will start running the service out of the box, using Docker 
    ```
 5. Send something to your bot. You should see some output on the container
 
-### Example: pytelegrambotapi + redis
+#### Example: pytelegrambotapi + redis (webhook)
 
 A Telegram Bot backend example is available [here](https://github.com/David-Lor/TelegramBot-Webhook-Updates-Receiver-Service/tree/example/pytelegrambotapi%2Bredis/telegrambot_client). It can be deployed with the following commands:
 
@@ -53,7 +55,7 @@ A Telegram Bot backend example is available [here](https://github.com/David-Lor/
 # Start ngrok
 ./ngrok http 8025
 
-# Add the REDIS_URL & REDIS_QUEUE_NAME settings (for both server & client) - Ensure you already have copied and modified a .env file!
+# Add the REDIS_URL & REDIS_QUEUE_NAME settings (for both server & client) - Ensure you already have copied and modified a .env file, including the webhook endpoint with the current ngrok domain!
 echo "REDIS_URL=redis://telegrambot-redis:6379" >> .env
 echo "REDIS_QUEUE_NAME=TelegramBotQueue" >> .env
 
@@ -70,6 +72,41 @@ docker run -d --name=telegrambot-receiver -p 8025:8025 --net=telegrambot-net -e 
 docker run -d --name=telegrambot-backend --net=telegrambot-net -e GIT_REPOSITORY="https://github.com/David-Lor/TelegramBot-Webhook-Updates-Receiver-Service" -e GIT_BRANCH="example/pytelegrambotapi+redis" --env-file=".env" davidlor/python-git-app:slim
 ```
 
+Alternatively, you can run the [self-hosted Telegram Bot API](https://github.com/lukaszraczylo/tdlib-telegram-bot-api-docker) with the `--local` argument, to avoid dealing with SSL certificates.
+
+### Polling
+
+The following steps will start running the service out of the box, using Docker and fetching the updates using the long-polling method, instead of setting up a webhook:
+
+1. You must own a Telegram bot. If not, create it from BotFather. You will need the bot token.
+2. Copy the `sample.env` file as `.env`, and complete the following settings
+   - `TELEGRAM_TOKEN` with you bot token
+3. Start running the receiver service:
+    ```bash
+    docker run --rm -it -e GIT_REPOSITORY="https://github.com/David-Lor/TelegramBot-Webhook-Updates-Receiver-Service" --env-file=".env" davidlor/python-git-app:slim
+    ```
+4. Send something to your bot. You should see some output on the container
+
+#### Example: pytelegrambotapi + redis (polling)
+
+```bash
+# Add the REDIS_URL & REDIS_QUEUE_NAME settings (for both server & client) - Ensure you already have copied and modified a .env file!
+echo "REDIS_URL=redis://telegrambot-redis:6379" >> .env
+echo "REDIS_QUEUE_NAME=TelegramBotQueue" >> .env
+
+# Create a docker network for the services
+docker network create telegrambot-net
+
+# Start the Redis server
+docker run -d --name=telegrambot-redis --network=telegrambot-net redis
+
+# Start the receiver service (receive updates through long-polling, enqueue on Redis)
+docker run -d --name=telegrambot-receiver --net=telegrambot-net -e GIT_REPOSITORY="https://github.com/David-Lor/TelegramBot-Webhook-Updates-Receiver-Service" --env-file=".env" davidlor/python-git-app:slim
+
+# Start the Telegram bot backend (read updates from Redis queue, process them)
+docker run -d --name=telegrambot-backend --net=telegrambot-net -e GIT_REPOSITORY="https://github.com/David-Lor/TelegramBot-Webhook-Updates-Receiver-Service" -e GIT_BRANCH="example/pytelegrambotapi+redis" --env-file=".env" davidlor/python-git-app:slim
+```
+
 ## Settings
 
 Settings are defined using environment variables, or a .env file. Variables defined as environment variables will override those defined in the .env file.
@@ -79,7 +116,7 @@ Settings are defined using environment variables, or a .env file. Variables defi
   - **PUBLISHER_CONNECT_TIMEOUT**: (default: `10`) timeout in seconds for all publishers to initialize/connect on service startup.
   - **TEARDOWN_TIMEOUT**: (default: `10`) timeout in seconds for all teardown operations, executed when service is closed.
 - **Webhook**
-  - **WEBHOOK_DOMAIN**: (**required**) domain where webhook is served, including "https://" or "http://", but NOT the endpoint.
+  - **WEBHOOK_DOMAIN**: (optional) domain where webhook is served, including "https://" or "http://", but NOT the endpoint. If not set, the updates will be acquired using Telegram getUpdates long-polling.
   - **WEBHOOK_ENDPOINT**: (default: `random`) endpoint where Telegram will send Webhook POST requests. With the domain, forms the webhook URL that is sent to Telegram to send bot updates to. Can be one of:
     - `random`: generate a random UUID4 string as endpoint, each time the application starts
     - `token`: use the bot token as endpoint
@@ -92,25 +129,25 @@ Settings are defined using environment variables, or a .env file. Variables defi
 - **Telegram**
   - **TELEGRAM_TOKEN**: (**required**) Telegram Bot token.
   - **TELEGRAM_DELETE_WEBHOOK**: (default: `true`) if true, delete the webhook when the application closes.
+  - **TELEGRAM_API_URL**: (default: `https://api.telegram.org`) base URL for the Telegram Bot API, may be changed for using a self-hosted Bot API.
+  - **TELEGRAM_POLLING_TIMEOUT**: (default: `10`) timeout in seconds for Telegram getUpdates long-polling individual requests.
 - **Redis**
   - **REDIS_URL**: (optional) if specified, put bot updates on a queue of the given Redis server. URL example: `redis://localhost:6379`.
   - **REDIS_QUEUE_NAME**: (default: `telegram_bot`) name of the Redis queue where bot updates are put.
 
 ## Upcoming features...
 
-- MQTT integration
-- AMQP integration
-- Integrate with ngrok (auto-load domain from Free plan)
-- Allow creating and/or using self-signed certificates
-- Make the service a library that can be imported on existing bots, so no microservice pattern would be required
 - Refactor example (do not use other branch) when `davidlor/python-git-app` Docker image supports arbitrary Python script running
 
 ## Changelog
 
 _Versions prior 1.0.0 are considered experimental and breaking changes may occur on MINOR versions (0.x)_
 
+- 0.2.0
+  - AMQP integration
+  - Support for Telegram getUpdates long-polling
 - 0.1.0
-    - Final version
-    - Redis integration
+  - Final version
+  - Redis integration
 - 0.0.1
-    - Initial PoC script
+  - Initial PoC script

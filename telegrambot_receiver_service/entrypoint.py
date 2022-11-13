@@ -3,8 +3,9 @@ import asyncio
 import uvloop
 
 from telegrambot_receiver_service.services.receivers.webhook import WebhookReceiver
+from telegrambot_receiver_service.services.receivers.polling import PollingReceiver
 from telegrambot_receiver_service.services.telegram import teardown_webhook
-from telegrambot_receiver_service.settings import redis_settings, amqp_settings, general_settings
+from telegrambot_receiver_service.settings import webhook_settings, redis_settings, amqp_settings, general_settings
 from telegrambot_receiver_service.utils import async_gather
 
 
@@ -23,7 +24,7 @@ def run():
                  timeout=general_settings.publisher_connect_timeout)
 
     try:
-        receiver = WebhookReceiver(publishers)
+        receiver = WebhookReceiver(publishers) if webhook_settings.enabled else PollingReceiver(publishers)
         receiver.run()
 
     finally:

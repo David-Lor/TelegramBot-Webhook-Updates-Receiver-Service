@@ -18,7 +18,7 @@ class BaseSettings(pydantic.BaseSettings):
 
 
 class WebhookSettings(BaseSettings):
-    domain: String
+    domain: Optional[String] = None
     endpoint: String = "random"
     bind: String = "0.0.0.0"
     port: int = 8000
@@ -28,6 +28,10 @@ class WebhookSettings(BaseSettings):
 
     class Config(BaseSettings.Config):
         env_prefix = "WEBHOOK_"
+
+    @property
+    def enabled(self) -> bool:
+        return bool(self.domain)
 
     @property
     def endpoint_is_random(self):
@@ -50,6 +54,7 @@ class TelegramSettings(BaseSettings):
     token: String
     delete_webhook: bool = True
     api_url: String = "https://api.telegram.org"
+    polling_timeout: int = 10
 
     class Config(BaseSettings.Config):
         env_prefix = "TELEGRAM_"
@@ -60,7 +65,7 @@ class RedisSettings(BaseSettings):
     queue_name: String = "telegram_bot"
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         return bool(self.url)
 
     class Config(BaseSettings.Config):
@@ -74,7 +79,7 @@ class AMQPSettings(BaseSettings):
     deliverymode_persistent: bool = False
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         return bool(self.url)
 
     class Config(BaseSettings.Config):
